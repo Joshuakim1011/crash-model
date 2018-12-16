@@ -4,7 +4,7 @@
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, average_precision_score
 import os
 import json
 import argparse
@@ -52,6 +52,10 @@ def output_importance(trained_model, features, datadir):
     # conversion to json
     with open(os.path.join(datadir, 'feature_importances.json'), 'w') as f:
         json.dump(feature_imp_dict, f)
+
+    # output model
+    with open(os.path.join(datadir, 'model.pkl'), 'wb') as f:
+        pickle.dump(trained_model, f)
 
 
 def set_params():
@@ -109,7 +113,7 @@ def set_defaults(config={}):
     if 'name' not in list(config.keys()):
         config['name'] = 'boston'
     if 'level' not in list(config.keys()):
-        config['level'] = 'week'
+        config['level'] = 'segment'
 
         
 def get_features(config, data, datadir):

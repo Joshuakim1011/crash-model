@@ -13,6 +13,8 @@ from .model_utils import format_crash_data
 from .model_classes import Indata, Tuner, Tester
 import sklearn.linear_model as skl
 import pickle
+from data.util import get_feature_list
+# import sklearn.linear_model as skl
 
 # all model outputs must be stored in the "data/processed/" directory
 BASE_DIR = os.path.dirname(
@@ -115,13 +117,12 @@ def set_defaults(config={}):
         config['level'] = 'segment'
 
         
-def get_features(config, data, datadir):
+def get_features(config, data):
     """
     Get features from the feature list created during data generation
     """
 
-    with open(os.path.join(datadir, 'features.yml')) as f:
-        features = yaml.safe_load(f)
+    features = get_feature_list(config)
 
     # segment chars
     # Dropping continuous features that don't exist
@@ -131,6 +132,7 @@ def get_features(config, data, datadir):
             print("Feature " + f + " not found, skipping")
         else:
             new_feats.append(f)
+
     f_cont = new_feats
     f_cat = features['f_cat']
 
@@ -357,7 +359,7 @@ if __name__ == '__main__':
         data = data.set_index('segment_id').loc[data.groupby('segment_id').crash.sum()>0]
         data.reset_index(inplace=True)
 
-    f_cat, f_cont, features = get_features(config, data, PROCESSED_DATA_FP)
+    f_cat, f_cont, features = get_features(config, data)
 
     # grab the highest values from each column
     data_segs = data.groupby('segment_id')[f_cont+f_cat].max()
